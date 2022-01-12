@@ -83,6 +83,11 @@ struct DARKSOUL_API FDarkSoulItemData
 	, ItemLevel(1)
 	{}
 
+	FDarkSoulItemData(int32 InItemCount, int32 InItemLevel)
+		: ItemCount(InItemCount)
+		, ItemLevel(InItemLevel)
+	{}
+
 	/** The number of instance of this item in the inventory, can never be below 1*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
 	int32 ItemCount;

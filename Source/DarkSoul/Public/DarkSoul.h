@@ -1,4 +1,4 @@
-// Copyright XGSN, All Rights Reserved
+// Copyright Yazj, All Rights Reserved
 
 #pragma once
 
@@ -10,7 +10,7 @@
 
 #include "CoreMinimal.h"
 #include "Net/UnrealNetwork.h"
-
+#include "EngineMinimal.h"
 #include "DarkSoulTypes.h"
 
 DARKSOUL_API DECLARE_LOG_CATEGORY_EXTERN(LogDarkSoul, Log, All);
