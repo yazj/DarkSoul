@@ -344,7 +344,7 @@ bool ADarkSoulPlayerController::LoadInventory()
 bool ADarkSoulPlayerController::FillEmptySlotWithItem(UDarkSoulItem* NewItem)
 {
 	// Look for an empty item slot to fill with this item
-	FPrimaryAssetType NewItemType = NewItem->GetPrimaryAssetId().PrimaryAssetType();
+	FPrimaryAssetType NewItemType = NewItem->GetPrimaryAssetId().PrimaryAssetType;
 	FDarkSoulItemSlot EmptySlot;
 
 	for (TPair<FDarkSoulItemSlot, UDarkSoulItem*>& Pair : SlottedItems)

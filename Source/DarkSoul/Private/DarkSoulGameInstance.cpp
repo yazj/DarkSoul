@@ -3,6 +3,12 @@
 
 #include "DarkSoulGameInstance.h"
 
+UDarkSoulGameInstance::UDarkSoulGameInstance()
+	: SaveSlot(TEXT("SaveGame"))
+	, SaveUserIndex(0)
+{
+}
+
 void UDarkSoulGameInstance::AddDefaultInventory(UDarkSoulSaveGame* SaveGame, bool bRemoveExtra)
 {
 }
