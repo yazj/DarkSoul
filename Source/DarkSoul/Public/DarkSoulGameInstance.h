@@ -26,7 +26,7 @@ public:
 
 	/** List of inventpry items to add to new players */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inventory)
-	TMap<FPrimaryAssetId, FDarkSoulItemData> Defaultinventory;
+	TMap<FPrimaryAssetId, FDarkSoulItemData> DefaultInventory;
 
 	/** Number of slots for each type of item */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Inventory)
