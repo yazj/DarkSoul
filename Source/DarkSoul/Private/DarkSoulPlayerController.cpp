@@ -5,6 +5,7 @@
 #include "DarkSoulCharacter.h"
 #include "DarkSoulGameInstance.h"
 #include "DarkSoulSaveGame.h"
+#include "DarkSoulAssetManager.h"
 
 bool ADarkSoulPlayerController::AddInventoryItem(UDarkSoulItem* NewItem, int32 ItemCount, int32 ItemLevel, bool bAutoSlot)
 {
@@ -286,34 +287,124 @@ bool ADarkSoulPlayerController::LoadInventory()
 		GameInstance->OnSaveGameLoadedNative.AddUObject(this, &ADarkSoulPlayerController::HandleSaveGameLoaded);
 	}
 
-	// ......
+	for (const TPair<FPrimaryAssetType, int32>& Pair : GameInstance->ItemSlotPerType)
+	{
+		for (int32 SlotNumber = 0; SlotNumber < Pair.Value; SlotNumber++)
+		{
+			SlottedItems.Add(FDarkSoulItemSlot(Pair.Key, SlotNumber), nullptr);
+		}
+	}
+
+	UDarkSoulSaveGame* CurrentSaveGame = GameInstance->GetCurrentSaveGame();
+	UDarkSoulAssetManager& AssetManager = UDarkSoulAssetManager::Get();
+	if (CurrentSaveGame)
+	{
+		// Copy from save game into controller data
+		bool bFoundAnySlots = false;
+		for (const TPair<FPrimaryAssetId, FDarkSoulItemData>& ItemPair : CurrentSaveGame->InventoryData)
+		{
+			UDarkSoulItem* LoadedItem = AssetManager.ForceLoadItem(ItemPair.Key);
+
+			if (LoadedItem != nullptr)
+			{
+				InventoryData.Add(LoadedItem, ItemPair.Value);
+			}
+		}
+
+		for (const TPair<FDarkSoulItemSlot, FPrimaryAssetId>& SlotPair : CurrentSaveGame->SlottedItems)
+		{
+			if (SlotPair.Value.IsValid())
+			{
+				UDarkSoulItem* LoadedItem = AssetManager.ForceLoadItem(SlotPair.Value);
+				if (GameInstance->IsValidItemSlot(SlotPair.Key) && LoadedItem)
+				{
+					SlottedItems.Add(SlotPair.Key, LoadedItem);
+					bFoundAnySlots = true;
+				}
+			}
+		}
+
+		if (!bFoundAnySlots)
+		{
+			// Auto slot items as no slots were saved
+			FillEmptySlots();
+		}
+
+		NotifyInventoryLoaded();
+		return true;
+
+	}
+
+	// Loaded failed but we reset inventory, so need to notify UI
+	NotifyInventoryLoaded();
 
 	return false;
 }
 
 bool ADarkSoulPlayerController::FillEmptySlotWithItem(UDarkSoulItem* NewItem)
 {
+	// Look for an empty item slot to fill with this item
+	FPrimaryAssetType NewItemType = NewItem->GetPrimaryAssetId().PrimaryAssetType();
+	FDarkSoulItemSlot EmptySlot;
+
+	for (TPair<FDarkSoulItemSlot, UDarkSoulItem*>& Pair : SlottedItems)
+	{
+		if (Pair.Key.ItemType == NewItemType)
+		{
+			if (Pair.Value == NewItem)
+			{
+				// Item already slotted
+				return false;
+			}
+			else if (Pair.Value == nullptr && (!EmptySlot.IsValid() || EmptySlot.SlotNumber > Pair.Key.SlotNumber))
+			{
+				// We found an empty slot worth filling
+				EmptySlot = Pair.Key;
+			}
+		}
+	}
+
+	if (EmptySlot.IsValid())
+	{
+		SlottedItems[EmptySlot] = NewItem;
+		NotifySlottedItemChanged(EmptySlot, NewItem);
+		return true;
+	}
+
 	return false;
+
 }
 
 void ADarkSoulPlayerController::NotifyInventoryItemChanged(bool bAdded, UDarkSoulItem* Item)
 {
-	return;
+	// Notify native before blueprint
+	OnInventoryItemChangedNative.Broadcast(bAdded, Item);
+	OnInventoryItemChanged.Broadcast(bAdded, Item);
+
+	// Call BP update event
+	InventoryItemChanged(bAdded, Item);
 }
 
 void ADarkSoulPlayerController::NotifySlottedItemChanged(FDarkSoulItemSlot ItemSlot, UDarkSoulItem* Item)
 {
-	return;
+	// Notify native before blueprint
+	OnSlottedItemChangedNative.Broadcast(ItemSlot, Item);
+	OnSlottedItemChanged.Broadcast(ItemSlot, Item);
+
+	// Call BP update event 
+	SlottedItemChanged(ItemSlot, Item);
 }
 
 void ADarkSoulPlayerController::NotifyInventoryLoaded()
 {
-	return;
+	// Notify native before blueprint
+	OnInventoryLoadedNative.Broadcast();
+	OnInventoryLoaded.Broadcast();
 }
 
 void ADarkSoulPlayerController::HandleSaveGameLoaded(UDarkSoulSaveGame* NewSaveGame)
 {
-	return;
+	SaveInventory();
 }
 
 void ADarkSoulPlayerController::BeginPlay()

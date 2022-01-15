@@ -40,7 +40,7 @@ public:
 	 * @param PrimaryAssetId The asset identifier to load
 	 * @param bDisplayWarning If true, this will log a warning if the item failed to load
 	*/
-	//UDarkSoulItem* ForceLoadItem(const FPrimaryAssetId& PrimaryAssetId, bool bLogWarning = true);
+	UDarkSoulItem* ForceLoadItem(const FPrimaryAssetId& PrimaryAssetId, bool bLogWarning = true);
 
 	
 };
