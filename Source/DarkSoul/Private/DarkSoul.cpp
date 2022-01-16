@@ -1,4 +1,4 @@
-// Copyright XGSN, All Rights Reserved.
+// Copyright Yazj, All Rights Reversed.
 
 #include "DarkSoul.h"
 #include "Modules/ModuleManager.h"
