@@ -62,28 +62,89 @@ bool UDarkSoulGameInstance::LoadOrCreateSaveGame()
 
 	if (UGameplayStatics::DoesSaveGameExist(SaveSlot, SaveUserIndex) && bSavingEnabled)
 	{
-
+		LoadedSave = Cast<UDarkSoulSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveSlot, SaveUserIndex));
 	}
+
+	return HandleSaveGameLoaded(LoadedSave);
 }
 
 bool UDarkSoulGameInstance::HandleSaveGameLoaded(USaveGame* SaveGameObject)
 {
-	return false;
+	bool bLoaded = false;
+
+	if (!bSavingEnabled)
+	{
+		// If saving is disabled, ignore passed in object
+		SaveGameObject = nullptr;
+	}
+
+	// Replace current save, old object will GC out
+	CurrentSaveGame = Cast<UDarkSoulSaveGame>(SaveGameObject);
+
+	if (CurrentSaveGame)
+	{
+		// Make sure it has newly added default inventory
+		AddDefaultInventory(CurrentSaveGame, false);
+		bLoaded = true;
+	}
+	else
+	{
+		// This creates it on demand
+		CurrentSaveGame = Cast<UDarkSoulSaveGame>(UGameplayStatics::CreateSaveGameObject(UDarkSoulSaveGame::StaticClass()));
+
+		AddDefaultInventory(CurrentSaveGame, true);
+	}
+
+	OnSaveGameLoaded.Broadcast(CurrentSaveGame);
+	OnSaveGameLoadedNative.Broadcast(CurrentSaveGame);
+
+	return bLoaded;
+
 }
 
 void UDarkSoulGameInstance::GetSaveSlotInfo(FString& SlotName, int32& UserIndex) const
 {
+	SlotName = SaveSlot;
+	UserIndex = SaveUserIndex;
 }
 
 bool UDarkSoulGameInstance::WriteSaveGame()
 {
+	if (bSavingEnabled)
+	{
+		if(bCurrentlySaving)
+		{
+			// Schedule another save to happen after current one finishes. We only queue one save
+			bPendingSaveRequested = true;
+			return true;
+		}
+
+		// Indicate that we're currently doing an async save
+		bCurrentlySaving = true;
+
+		// This goes off in the background
+		UGameplayStatics::AsyncSaveGameToSlot(GetCurrentSaveGame(), SaveSlot, SaveUserIndex,
+			FAsyncSaveGameToSlotDelegate::CreateUObject(this, &UDarkSoulGameInstance::HandleAsyncSave));
+		return true;
+	}
 	return false;
 }
 
 void UDarkSoulGameInstance::ResetSaveGame()
 {
+	// Call handle function with no loaded save, this will reset the data
+	HandleSaveGameLoaded(nullptr);
 }
 
 void UDarkSoulGameInstance::HandleAsyncSave(const FString& SlotName, const int32 UserIndex, bool bSuccess)
 {
+	ensure(bCurrentlySaving);
+	bCurrentlySaving = false;
+
+	if (bPendingSaveRequested)
+	{
+		// Start another save as we got a request while saving
+		bPendingSaveRequested = false;
+		WriteSaveGame();
+	}
 }
