@@ -1,9 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Yazj , All Rights Reserve
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "DarkSoul.h"
 #include "AbilitySystemComponent.h"
+#include "Abilities/DarkSoulAbilityTypes.h"
 #include "DarkSoulAbilitySystemComponent.generated.h"
 
 /**

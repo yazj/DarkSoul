@@ -13,9 +13,9 @@
 #include "Abilities/GameplayAbilityTargetTypes.h"
 #include "DarkSoulAbilityTypes.generated.h"
 
-//class UDarkSoulAbilitySystemComponent;
-//class UGameplayEffect;
-//class UDarkSoulTargetType;
+class UDarkSoulAbilitySystemComponent;
+class UGameplayEffect;
+class UDarkSoulTargetType;
 
 /**
 *	Struct defining a list of gameplay effects, a tag , and targeting info
@@ -26,6 +26,15 @@ struct FDarkSoulGameplayEffectContainer
 {
 	GENERATED_BODY()
 public:
+	FDarkSoulGameplayEffectContainer() {}
+
+	/** Sets the way that targeting happens */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CameplayEffectContainer)
+	TSubclassOf<UDarkSoulTargetType> TargetType;
+
+	/** List of gameplay effects to apply to the targets */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CameplayEffectContainer)
+	TArray<TSubclassOf<UGameplayEffect>> TargetGameplayEffectClasses;
 
 };
 
@@ -37,5 +46,25 @@ struct FDarkSoulGameplayEffectContainerSpec
 {
 	GENERATED_BODY()
 public:
+
+	FDarkSoulGameplayEffectContainerSpec() {}
+
+	/** Computed target data */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CameplayEffectContainer)
+	FGameplayAbilityTargetDataHandle TargetData;
+
+	/** List of gameplay effects to apply to the targets */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CameplayEffectContainer)
+	TArray<FGameplayAbilityTargetDataHandle> TargetGameplayEffectSpecs;
+
+	/** Returns true if this has any valid effect specs */
+	bool HasValidEffects() const;
+
+	/** Returns true if this has any valid targets */
+	bool HasValidTargets() const;
+
+	/** Adds new targets to target data */
+	void AddTargets(const TArray<FHitResult>& HitResults, const TArray<AActor*>& TargetActors);
+
 
 };

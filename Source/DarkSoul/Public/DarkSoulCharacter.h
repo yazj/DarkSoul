@@ -147,8 +147,12 @@ protected:
 	*	@param DamageCauser The actual actor that did the damage, might be a weapon or projectile
 	*/
 	UFUNCTION(BlueprintimplementableEvent)
-	void OnDamaged(float DamageAmount, const FHitResult& HitInfo,
-		const struct FGameplayTagContainer& DamageTags, ADarkSoulCharacter* DamageCauser);
+	void OnDamaged(
+		float DamageAmount, 
+		const FHitResult& HitInfo,
+		const struct FGameplayTagContainer& DamageTags, 
+		ADarkSoulCharacter* InstigatorCharacter,
+		AActor* DamageCauser);
 
 	/**
 	*	Called when health is changed, either from healing or from being damaged
