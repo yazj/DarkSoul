@@ -10,7 +10,7 @@
 #include "DarkSoulItem.generated.h"
 
 /**
- * 
+ * Base class for all items, do not blueprint directly
  */
 UCLASS()
 class DARKSOUL_API UDarkSoulItem : public UPrimaryDataAsset
