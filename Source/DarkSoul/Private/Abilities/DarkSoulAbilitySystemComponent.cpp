@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Yazj, All Rights Reversed
 
 #include "Abilities/DarkSoulAbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
