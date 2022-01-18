@@ -55,7 +55,7 @@ public:
 
 	/** List of gameplay effects to apply to the targets */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = CameplayEffectContainer)
-	TArray<FGameplayAbilityTargetDataHandle> TargetGameplayEffectSpecs;
+	TArray<FGameplayEffectSpecHandle> TargetGameplayEffectSpecs;
 
 	/** Returns true if this has any valid effect specs */
 	bool HasValidEffects() const;
